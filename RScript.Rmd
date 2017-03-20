@@ -1,0 +1,119 @@
+---
+title: "R Script Examples"
+author: "Burcin Can Metin"
+date: "3/1/2017"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+chooseCRANmirror(graphics=FALSE, ind=1)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Script Examples with R Markdown
+
+This is an R Markdown document for authoring PDF document regarding simple R scripts. The syntax contains how to open and read the json file from [Yelp Data Set](https://www.yelp.com/dataset_challenge).
+
+```{r Yelp Academic Data Set}
+library(jsonlite)
+library(dplyr)
+```
+
+## Looking into Business Data
+```{r, results='hide', echo=TRUE}
+datapath <- "~/Desktop/DS/dataset"
+business <- stream_in(file(file.path(datapath, "yelp_academic_dataset_business.json")))
+```
+
+```{r, results='hide', echo=TRUE}
+glimpse(business)
+dim(business)
+business_df <- select(business, -neighborhood, -address, -postal_code, -latitude, -longitude, -attributes, -hours, -type)
+head(business_df)
+```
+
+## Looking into Category Data
+```{r}
+install.packages("tidyr")
+library(tidyr)
+```
+
+
+#### Create a data frame for categories
+```{r}
+category_df <- select (business_df, name, categories)
+```
+
+#### What categories in the data frame as a list?
+```{r, results='hide', echo=TRUE}
+#results <- sapply(category_df$categories[], function(x){print(x)})
+```
+
+#### A List of first 6 Restaurants from the category data frame
+```{r}
+head(filter(category_df, categories == "Restaurants"))
+```
+
+#### How many categories are there?
+```{r}
+length(category_df$categories[])
+```
+
+#### How many unique categories are there?
+```{r}
+length(unique(unlist(category_df[,2])[!unlist(category_df[,2]) %in% c(NA)]))
+```
+
+#### What are the unique categories?
+```{r, results='hide', echo=TRUE}
+(unique(unlist(category_df[,2])[!unlist(category_df[,2]) %in% c(NA)]))
+```
+
+#### How many Restaurants are in Yelp Business Data Set?
+```{r}
+number_of_restaurants <- sapply(category_df$categories, function(x){"Restaurants" %in% x})
+sum(number_of_restaurants)
+```
+
+#### Create a table of categories
+```{r}
+table_of_categories <- table(unlist(category_df$categories))
+```
+
+#### What are the most frequent categories?
+```{r, results='hide', echo=TRUE}
+most_frequent_categories <- sort(table_of_categories, decreasing = TRUE)
+```
+
+#### Top 10 Categories
+```{r}
+top_ten <- sort(table_of_categories, decreasing = TRUE)[1:10]
+top_ten
+```
+
+#### 5 Most Popular Categories
+```{r echo=FALSE, results='asis'}
+library(knitr)
+x <- table(unlist(category_df$categories))
+y <- sort(x, decreasing = TRUE) [1:5]
+z <- data.frame(y)
+knitr::kable(z)
+```
+
+
+#### A Basic Graph of Top 10 Categories
+```{r}
+plot(top_ten)
+```
+
+#### Pie Chart of Top 10 Categories
+```{r}
+names_of_top_ten <- paste(names(top_ten), "\n", top_ten, sep = "")
+pie(top_ten, labels = names_of_top_ten, main = "Pie Chart of Top 10 Categories")
+```
+
+
+
+
+
+
